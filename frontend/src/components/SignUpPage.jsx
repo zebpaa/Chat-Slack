@@ -11,7 +11,7 @@ const SignUpPage = () => {
                     <Card className="shadow-sm">
                         <Card.Body className="d-flex flex-column flex-md-row justify-content-around align-items-center p-5">
                             <div>
-                                <Image alt="Регистрация" src="src/assets/signup-avatar.jpg" roundedCircle />
+                                <Image alt="Регистрация" src="/images/signup-avatar.jpg" roundedCircle />
                             </div>
                             <Form className="w-50">
                                 <h1 className="text-center mb-4">Регистрация</h1>
