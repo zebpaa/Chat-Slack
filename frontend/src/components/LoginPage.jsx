@@ -3,18 +3,19 @@ import { useState, useRef, useEffect } from 'react';
 import { useFormik } from 'formik';
 import axios from 'axios';
 import routes from '../routes.js';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
     Container, Row, Col, Card,
     Form, Button, FloatingLabel, Image,
 } from 'react-bootstrap';
+import useAuth from '../hooks/index.jsx';
 
 
 const LoginPage = () => {
+    const auth = useAuth();
     const [authFailed, setAuthFailed] = useState(false);
     const inputRef = useRef();
     const navigate = useNavigate();
-    const location = useLocation();
 
     useEffect(() => {
         inputRef.current.focus();
@@ -25,23 +26,24 @@ const LoginPage = () => {
             username: '',
             password: '',
         },
-        onSubmit: (values) => {
+        onSubmit: async (values) => {
             setAuthFailed(false);
 
-            axios.post(routes.loginPath(), values)
-                .then((data) => {
-                    console.log('data: ', data);
-                    localStorage.setItem('userId', JSON.stringify(data));
-                    const { from } = location.state;
-                    navigate(from);
-                })
-                .catch((error) => {
-                    formik.setSubmitting(false);
+            try {
+                const res = await axios.post(routes.loginPath(), values);
+                localStorage.setItem('user', JSON.stringify(res.data));
+                auth.logIn();
+                navigate('/');
+            } catch (err) {
+                formik.setSubmitting(false);
+                if (err.isAxiosError && err.response.status === 401) {
                     setAuthFailed(true);
-                    console.log('error: ', error);
-                })
-
-        }
+                    inputRef.current.select();
+                    return;
+                }
+                throw err;
+            }
+        },
     });
 
     return (
