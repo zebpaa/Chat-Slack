@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { Navbar, Container, Button } from "react-bootstrap";
 import LoginPage from "./LoginPage";
@@ -17,6 +17,15 @@ const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
         setLoggedIn(false);
     };
+
+    useEffect(() => {
+        const user = localStorage.getItem('user');
+        if (user) {
+            logIn();
+        } else {
+            logOut();
+        }
+    }, []);
 
     return (
         <AuthContext.Provider value={{ loggedIn, logIn, logOut }}>
