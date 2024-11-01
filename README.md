@@ -6,6 +6,10 @@
 
 https://chat-slack-kgze.onrender.com
 
+## Description
+
+Chat (Slack) is a simplified version of a real-time messaging application for team collaboration, developed using React, Redux (with reduxjs/toolkit), and WebSockets for instant communication. The project includes REST API integration, client-side routing, authentication and authorization, and uses webpack for bundling and deployment. It is designed to demonstrate key technologies commonly used in modern frontend development.
+
 ## Development command
 
 ### Run backend
