@@ -1,8 +1,13 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { Button, Container, Row, Col, Nav } from 'react-bootstrap';
+import { useEffect } from 'react';
+import { Button, Container, Row, Col, Nav, Dropdown, ButtonGroup } from 'react-bootstrap';
 import MessageBox from './MessageBox.jsx';
 import routes from '../routes.js';
+import { useSelector, useDispatch } from "react-redux";
+import { selectors as channelsSelectors } from '../services/channelsSlice.js'
+import { selectors as messagesSelectors } from '../services/messagesSlice.js'
+import { addChannels } from '../services/channelsSlice.js';
+import { addMessages } from '../services/messagesSlice.js';
 
 const getAuthHeader = () => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -15,39 +20,59 @@ const getAuthHeader = () => {
 };
 
 const HomePage = () => {
-    const [channels, setChannels] = useState('');
-    const [messages, setMessages] = useState('');
+    const dispatch = useDispatch();
+    const channels = useSelector(channelsSelectors.selectAll);
+    const messages = useSelector(messagesSelectors.selectAll);
 
     useEffect(() => {
-        const fetchContent = async () => {
+        const fetchChannels = async () => {
             const { data } = await axios.get(routes.channelsPath(), { headers: getAuthHeader() });
-            setChannels(data);
+            dispatch(addChannels(data));
         };
 
-        fetchContent();
+        fetchChannels();
     }, []);
 
     useEffect(() => {
-        const fetchContent = async () => {
+        const fetchMessages = async () => {
             const { data } = await axios.get(routes.messagesPath(), { headers: getAuthHeader() });
-            setMessages(data);
+            dispatch(addMessages(data));
         };
 
-        fetchContent();
+        fetchMessages();
     }, []);
+
+    const renderUnremovableChannel = (channel) => (
+        <Button className="w-100 rounded-0 text-start" variant="">
+            <span className="me-1">#</span>{channel.name}
+        </Button>
+    );
+
+    const renderRemovableChannel = (channel) => (
+        <Dropdown className="d-flex" as={ButtonGroup}>
+            <Button variant="" className="w-100 rounded-0 text-start text-truncate">
+                <span className="me-1">#</span>{channel.name}
+            </Button >
+            <Dropdown.Toggle className="flex-grow-0 btn" split id="dropdown-split-basic" variant="" >
+                <span class="visually-hidden">Управление каналом</span>
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+                <Dropdown.Item as={Button} href="#">Удалить</Dropdown.Item>
+                <Dropdown.Item as={Button} href="#">Переименовать</Dropdown.Item>
+            </Dropdown.Menu>
+        </Dropdown >
+    );
 
     const renderChannels = () => {
-        if (channels.length === 0) {
-            return null;
-        }
+        if (channels.length === 0) null;
+
         return (
             channels.map((channel) => (
-                <li key={channel.id} className="nav-item w-100">
-                    <Button className="w-100 rounded-0 text-start" variant="btn-secondary">
-                        <span className="me-1">#</span>{channel.name}</Button>
-                </li>
+                <Nav.Item key={channel.id} className="w-100">
+                    {channel.removable ? renderRemovableChannel(channel) : renderUnremovableChannel(channel)}
+                </Nav.Item >
             ))
-        )
+        );
     };
 
     return (
@@ -69,7 +94,7 @@ const HomePage = () => {
                     </Nav>
                 </Col>
                 <Col className="p-0 h-100">
-                    <MessageBox />
+                    <MessageBox messages={messages} />
                 </Col>
             </Row>
         </Container>
