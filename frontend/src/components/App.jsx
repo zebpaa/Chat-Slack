@@ -8,13 +8,17 @@ import SignUpPage from "./SignUpPage";
 import AuthContext from '../contexts/AuthContext';
 import useAuth from '../hooks/index.jsx';
 import HomePage from './HomePage.jsx';
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../services/authSlice.js';
 
 const AuthProvider = ({ children }) => {
     const [loggedIn, setLoggedIn] = useState(false);
+    const dispatch = useDispatch();
 
     const logIn = () => setLoggedIn(true);
     const logOut = () => {
         localStorage.removeItem('user');
+        dispatch(logoutUser());
         setLoggedIn(false);
     };
 
