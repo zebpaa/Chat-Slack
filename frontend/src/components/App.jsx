@@ -17,18 +17,16 @@ const AuthProvider = ({ children }) => {
 
     const logIn = () => setLoggedIn(true);
     const logOut = () => {
-        localStorage.removeItem('user');
+        localStorage.removeItem('username');
+        localStorage.removeItem('token');
         dispatch(logoutUser());
         setLoggedIn(false);
     };
 
     useEffect(() => {
-        const user = localStorage.getItem('user');
-        if (user) {
-            logIn();
-        } else {
-            logOut();
-        }
+        const user = localStorage.getItem('username');
+        const token = localStorage.getItem('token');
+        user && token ? logIn() : logOut();
     }, []);
 
     return (
