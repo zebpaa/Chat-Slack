@@ -6,21 +6,19 @@ import routes from '../routes.js';
 import { useSelector, useDispatch } from "react-redux";
 import { selectors as channelsSelectors, addChannels, addChannel, removeChannel } from '../services/channelsSlice.js'
 import { selectors as messagesSelectors, addMessages } from '../services/messagesSlice.js'
+import { setCurrentChannel } from '../services/uiSlice.js';
 
 const getAuthHeader = () => {
     const token = JSON.parse(localStorage.getItem('token'));
-
-    if (token) {
-        return { Authorization: `Bearer ${token}` };
-    }
-
-    return {};
+    return token ? { Authorization: `Bearer ${token}` } : {}
 };
 
 const HomePage = () => {
     const dispatch = useDispatch();
     const channels = useSelector(channelsSelectors.selectAll);
     const messages = useSelector(messagesSelectors.selectAll);
+    const currentChannelId = useSelector((state) => state.ui.currentChannelId);
+    const defaultChannelId = useSelector((state) => state.ui.defaultChannelId);
 
     useEffect(() => {
         const fetchChannels = async () => {
@@ -52,26 +50,26 @@ const HomePage = () => {
 
     const handleRemoveChannel = (id) => () => {
         const deleteChannel = async () => {
-            const { data } = await axios.delete(routes.channelPath(id), { headers: getAuthHeader() });
-            console.log('data: ', data);
+            await axios.delete(routes.channelPath(id), { headers: getAuthHeader() });
             dispatch(removeChannel(id));
+            dispatch(setCurrentChannel(defaultChannelId))
         };
 
         deleteChannel();
     };
 
     const renderUnremovableChannel = (channel) => (
-        <Button className="w-100 rounded-0 text-start" variant="">
+        <Button className="w-100 rounded-0 text-start" variant={channel.id === currentChannelId ? 'secondary' : ''}>
             <span className="me-1">#</span>{channel.name}
         </Button>
     );
 
     const renderRemovableChannel = (channel) => (
-        <Dropdown className="d-flex" as={ButtonGroup}>
-            <Button variant="" className="w-100 rounded-0 text-start text-truncate">
+        <Dropdown className="d-flex" as={ButtonGroup} >
+            <Button variant={channel.id === currentChannelId ? 'secondary' : ''} className="w-100 rounded-0 text-start text-truncate">
                 <span className="me-1">#</span>{channel.name}
             </Button >
-            <Dropdown.Toggle className="flex-grow-0 btn" split id="dropdown-split-basic" variant="" >
+            <Dropdown.Toggle className="flex-grow-0 btn" split id="dropdown-split-basic" variant={channel.id === currentChannelId ? 'secondary' : ''} >
                 <span className="visually-hidden">Управление каналом</span>
             </Dropdown.Toggle>
             <Dropdown.Menu>
@@ -86,7 +84,7 @@ const HomePage = () => {
 
         return (
             channels.map((channel) => (
-                <Nav.Item key={channel.id} className="w-100">
+                <Nav.Item key={channel.id} className="w-100" onClick={() => dispatch(setCurrentChannel(`${channel.id}`))}>
                     {channel.removable ? renderRemovableChannel(channel) : renderUnremovableChannel(channel)}
                 </Nav.Item >
             ))
@@ -112,7 +110,7 @@ const HomePage = () => {
                     </Nav>
                 </Col>
                 <Col className="p-0 h-100">
-                    <MessageBox messages={messages} />
+                    <MessageBox messages={messages} currentChannelId={currentChannelId} />
                 </Col>
             </Row>
         </Container>
