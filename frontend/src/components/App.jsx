@@ -12,7 +12,8 @@ import { useDispatch } from 'react-redux';
 import { logoutUser } from '../services/authSlice.js';
 
 const AuthProvider = ({ children }) => {
-    const [loggedIn, setLoggedIn] = useState(false);
+    const hasToken = !!localStorage.getItem('token');
+    const [loggedIn, setLoggedIn] = useState(hasToken);
     const dispatch = useDispatch();
 
     const logIn = () => setLoggedIn(true);
