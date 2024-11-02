@@ -1,9 +1,13 @@
 import { useFormik } from "formik";
 import { useEffect, useRef } from "react";
 import { Button, Form } from "react-bootstrap";
+import { useSelector } from "react-redux";
+import { selectors as channelsSelectors } from '../services/channelsSlice.js'
 
-const MessageBox = ({ messages }) => {
+const MessageBox = ({ messages, currentChannelId }) => {
+    const channels = useSelector(channelsSelectors.selectAll);
     const inputRef = useRef();
+    const currentChannel = channels.find((channel) => channel.id === currentChannelId);
 
     useEffect(() => {
         inputRef.current.focus();
@@ -32,7 +36,7 @@ const MessageBox = ({ messages }) => {
     return (
         <div className="d-flex flex-column h-100">
             <div className="bg-light mb-4 p-3 shadow-sm small">
-                <p className="m-0"><b># general</b></p>
+                <p className="m-0"><b># {currentChannel?.name || null}</b></p>
                 <span className="text-muted">0 сообщений</span>
             </div>
             <div id="messages-box" className="chat-messages overflow-auto px-5 ">
