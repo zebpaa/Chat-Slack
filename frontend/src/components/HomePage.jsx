@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Container, Row, Col, Nav, Dropdown, ButtonGroup } from 'react-bootstrap';
 import MessageBox from './MessageBox.jsx';
 import routes from '../routes.js';
@@ -17,8 +17,10 @@ const HomePage = () => {
     const dispatch = useDispatch();
     const channels = useSelector(channelsSelectors.selectAll);
     const messages = useSelector(messagesSelectors.selectAll);
-    const currentChannelId = useSelector((state) => state.ui.currentChannelId);
+    const currentChannel = useSelector((state) => state.ui.currentChannelId);
     const defaultChannelId = useSelector((state) => state.ui.defaultChannelId);
+
+    const [currentChannelId, setCurrentChannelId] = useState(currentChannel);
 
     useEffect(() => {
         const fetchChannels = async () => {
@@ -38,11 +40,18 @@ const HomePage = () => {
         fetchMessages();
     }, []);
 
+    const handleSetCurrentChannelId = (id) => () => {
+        setCurrentChannelId(id)
+        dispatch(setCurrentChannel(id))
+    };
+
     const handleAddChannel = () => {
         const newChannel = { name: 'new channel' };
         const postChannel = async () => {
             const { data } = await axios.post(routes.channelsPath(), newChannel, { headers: getAuthHeader() });
+            setCurrentChannelId(data.id)
             dispatch(addChannel(data));
+            dispatch(setCurrentChannel(data.id));
         };
 
         postChannel();
@@ -51,6 +60,7 @@ const HomePage = () => {
     const handleRemoveChannel = (id) => () => {
         const deleteChannel = async () => {
             await axios.delete(routes.channelPath(id), { headers: getAuthHeader() });
+            setCurrentChannelId(defaultChannelId)
             dispatch(removeChannel(id));
             dispatch(setCurrentChannel(defaultChannelId))
         };
@@ -58,22 +68,24 @@ const HomePage = () => {
         deleteChannel();
     };
 
-    const renderUnremovableChannel = (channel) => (
-        <Button className="w-100 rounded-0 text-start" variant={channel.id === currentChannelId ? 'secondary' : ''}>
-            <span className="me-1">#</span>{channel.name}
+    const getVariant = (channelId) => (channelId === currentChannelId ? 'secondary' : '');
+
+    const renderUnremovableChannel = ({ id, name }) => (
+        <Button className="w-100 rounded-0 text-start" variant={getVariant(id)}>
+            <span className="me-1">#</span>{name}
         </Button>
     );
 
-    const renderRemovableChannel = (channel) => (
+    const renderRemovableChannel = ({ name, id }) => (
         <Dropdown className="d-flex" as={ButtonGroup} >
-            <Button variant={channel.id === currentChannelId ? 'secondary' : ''} className="w-100 rounded-0 text-start text-truncate">
-                <span className="me-1">#</span>{channel.name}
+            <Button variant={getVariant(id)} className="w-100 rounded-0 text-start text-truncate">
+                <span className="me-1">#</span>{name}
             </Button >
-            <Dropdown.Toggle className="flex-grow-0 btn" split id="dropdown-split-basic" variant={channel.id === currentChannelId ? 'secondary' : ''} >
+            <Dropdown.Toggle className="flex-grow-0 btn" split id="dropdown-split-basic" variant={getVariant(id)} >
                 <span className="visually-hidden">Управление каналом</span>
             </Dropdown.Toggle>
             <Dropdown.Menu>
-                <Dropdown.Item as={Button} href="#" onClick={handleRemoveChannel(channel.id)}>Удалить</Dropdown.Item>
+                <Dropdown.Item as={Button} href="#" onClick={handleRemoveChannel(id)}>Удалить</Dropdown.Item>
                 <Dropdown.Item as={Button} href="#">Переименовать</Dropdown.Item>
             </Dropdown.Menu>
         </Dropdown >
@@ -84,7 +96,7 @@ const HomePage = () => {
 
         return (
             channels.map((channel) => (
-                <Nav.Item key={channel.id} className="w-100" onClick={() => dispatch(setCurrentChannel(`${channel.id}`))}>
+                <Nav.Item key={channel.id} className="w-100" onClick={handleSetCurrentChannelId(channel.id)}>
                     {channel.removable ? renderRemovableChannel(channel) : renderUnremovableChannel(channel)}
                 </Nav.Item >
             ))
