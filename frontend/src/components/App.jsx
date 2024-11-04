@@ -10,6 +10,9 @@ import useAuth from '../hooks/index.jsx';
 import HomePage from './HomePage.jsx';
 import { useDispatch } from 'react-redux';
 import { logoutUser } from '../services/authSlice.js';
+import socket from '../socket.js';
+import { addChannel, removeChannel } from '../services/channelsSlice.js'
+import { addMessage } from '../services/messagesSlice.js'
 
 const AuthProvider = ({ children }) => {
     const hasToken = !!localStorage.getItem('token');
@@ -55,6 +58,33 @@ const AuthButton = () => {
 };
 
 const App = () => {
+    const dispatch = useDispatch();
+    
+    useEffect(() => {
+        socket.on('newMessage', (payload) => {
+            console.log(payload); // => { body: "new message", channelId: 7, id: 8, username: "admin" }
+            dispatch(addMessage(payload));
+        });
+        socket.on('newChannel', (payload) => {
+            console.log(payload) // { id: 6, name: "new channel", removable: true }
+            dispatch(addChannel(payload));
+        });
+        socket.on('removeChannel', (payload) => {
+            console.log(payload); // { id: 6 };
+            dispatch(removeChannel(payload));
+        });
+        // socket.on('renameChannel', (payload) => {
+        //     console.log(payload); // { id: 7, name: "new name channel", removable: true }
+        // });
+
+        return () => {
+            socket.off('newMessage');
+            socket.off('newChannel');
+            socket.off('removeChannel');
+            socket.off('renameChannel');
+        };
+    }, [dispatch]);
+
     return (
         <AuthProvider>
             <div className="d-flex flex-column h-100">
