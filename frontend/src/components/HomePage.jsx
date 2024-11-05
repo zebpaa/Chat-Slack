@@ -29,7 +29,7 @@ const HomePage = () => {
         };
 
         fetchChannels();
-    }, []);
+    }, [dispatch]);
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -38,7 +38,7 @@ const HomePage = () => {
         };
 
         fetchMessages();
-    }, []);
+    }, [dispatch]);
 
     const handleSetCurrentChannelId = (id) => () => {
         setCurrentChannelId(id)
