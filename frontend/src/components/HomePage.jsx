@@ -4,9 +4,10 @@ import { Button, Container, Row, Col, Nav, Dropdown, ButtonGroup } from 'react-b
 import MessageBox from './MessageBox.jsx';
 import routes from '../routes.js';
 import { useSelector, useDispatch } from "react-redux";
-import { selectors as channelsSelectors, addChannels, addChannel, removeChannel } from '../services/channelsSlice.js'
+import { selectors as channelsSelectors, addChannels } from '../services/channelsSlice.js'
 import { selectors as messagesSelectors, addMessages } from '../services/messagesSlice.js'
 import { setCurrentChannel } from '../services/uiSlice.js';
+import getModal from './modals/index.js';
 
 const getAuthHeader = () => {
     const token = JSON.parse(localStorage.getItem('token'));
@@ -18,9 +19,25 @@ const HomePage = () => {
     const channels = useSelector(channelsSelectors.selectAll);
     const messages = useSelector(messagesSelectors.selectAll);
     const currentChannel = useSelector((state) => state.ui.currentChannelId);
-    const defaultChannelId = useSelector((state) => state.ui.defaultChannelId);
 
     const [currentChannelId, setCurrentChannelId] = useState(currentChannel);
+    const [modalInfo, setModalInfo] = useState({ type: null, item: null });
+    const hideModal = () => setModalInfo({ type: null, item: null });
+    const showModal = (type, item = null) => setModalInfo({ type, item });
+
+    const renderModal = ({ modalInfo, hideModal, setCurrentChannelId, currentChannelId }) => {
+        if (!modalInfo.type) {
+            return null;
+        }
+
+        const Component = getModal(modalInfo.type);
+        return <Component
+            modalInfo={modalInfo}
+            onHide={hideModal}
+            setCurrentChannelId={setCurrentChannelId}
+            currentChannelId={currentChannelId}
+        />;
+    };
 
     useEffect(() => {
         const fetchChannels = async () => {
@@ -45,29 +62,6 @@ const HomePage = () => {
         dispatch(setCurrentChannel(id))
     };
 
-    const handleAddChannel = () => {
-        const newChannel = { name: 'new channel' };
-        const postChannel = async () => {
-            const { data } = await axios.post(routes.channelsPath(), newChannel, { headers: getAuthHeader() });
-            setCurrentChannelId(data.id)
-            dispatch(addChannel(data));
-            dispatch(setCurrentChannel(data.id));
-        };
-
-        postChannel();
-    };
-
-    const handleRemoveChannel = (id) => () => {
-        const deleteChannel = async () => {
-            await axios.delete(routes.channelPath(id), { headers: getAuthHeader() });
-            setCurrentChannelId(defaultChannelId)
-            dispatch(removeChannel(id));
-            dispatch(setCurrentChannel(defaultChannelId))
-        };
-
-        deleteChannel();
-    };
-
     const getVariant = (channelId) => (channelId === currentChannelId ? 'secondary' : '');
 
     const renderUnremovableChannel = ({ id, name }) => (
@@ -85,8 +79,8 @@ const HomePage = () => {
                 <span className="visually-hidden">Управление каналом</span>
             </Dropdown.Toggle>
             <Dropdown.Menu>
-                <Dropdown.Item as={Button} href="#" onClick={handleRemoveChannel(id)}>Удалить</Dropdown.Item>
-                <Dropdown.Item as={Button} href="#">Переименовать</Dropdown.Item>
+                <Dropdown.Item as={Button} href="#" onClick={() => showModal('removing', id)}>Удалить</Dropdown.Item>
+                <Dropdown.Item as={Button} href="#" onClick={() => showModal('renaming', id)}>Переименовать</Dropdown.Item>
             </Dropdown.Menu>
         </Dropdown >
     );
@@ -109,13 +103,14 @@ const HomePage = () => {
                 <Col bsPrefix="col-4" className="col-md-2 border-end px-0 bg-light flex-column h-100 d-flex">
                     <div className="d-flex mt-1 justify-content-between mb-2 ps-4 pe-2 p-4">
                         <b>Каналы</b>
-                        <Button variant="group-vertical" className="p-0 text-primary" onClick={handleAddChannel}>
+                        <Button variant="group-vertical" className="p-0 text-primary" onClick={() => showModal('adding')}>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
                                 <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
                                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
                             </svg>
                             <span className="visually-hidden">+</span>
                         </Button>
+                        {renderModal({ modalInfo, hideModal, setCurrentChannelId, currentChannelId })}
                     </div>
                     <Nav as="ul" id="channels-box" className="flex-column nav-pills nav-fill px-2 mb-3 overflow-auto h-100 d-block">
                         {renderChannels()}
