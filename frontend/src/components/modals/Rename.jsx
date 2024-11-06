@@ -31,9 +31,9 @@ const Rename = ({ onHide, currentChannelId }) => {
         enableReinitialize: true,
         onSubmit: async (values) => {
             try {
-                const response = await axios.patch(routes.channelPath(currentChannelId), values, { headers: getAuthHeader() })
-                console.log(response); // => { id: '3', name: 'new name channel', removable: true }
-                dispatch(updateChannel());
+                const newChannel = { changes: { name: values.name }, id: currentChannelId };
+                await axios.patch(routes.channelPath(currentChannelId), values, { headers: getAuthHeader() })
+                dispatch(updateChannel(newChannel));
                 onHide();
             } catch (err) {
                 formik.setSubmitting(false);
