@@ -10,6 +10,7 @@ import useAuth from "../hooks";
 import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { loginUser } from '../services/authSlice.js';
+import * as Yup from 'yup';
 
 const SignUpPage = () => {
     const dispatch = useDispatch();
@@ -21,11 +22,26 @@ const SignUpPage = () => {
         inputRef.current.focus();
     }, []);
 
+    const signUpSchema = Yup.object().shape({
+        username: Yup.string()
+            .required('Обязательное поле')
+            .min(3, 'От 3 до 20 символов')
+            .max(20, 'От 3 до 20 символов'),
+        password: Yup.string()
+            .required('Обязательное поле')
+            .min(6, 'Не менее 6 символов'),
+        confirmPassword: Yup.string()
+            .required('Обязательное поле')
+            .oneOf([Yup.ref('password')], 'Пароли должны совпадать'),
+    });
+
     const formik = useFormik({
         initialValues: {
             username: '',
             password: '',
+            confirmPassword: '',
         },
+        validationSchema: signUpSchema,
         onSubmit: async (values) => {
             try {
                 const response = await axios.post(routes.signupPath(), values)
@@ -73,10 +89,10 @@ const SignUpPage = () => {
                                         placeholder="От 3 до 20 символов"
                                         ref={inputRef}
                                         required
-                                    // isInvalid={authFailed}
+                                        className={`${formik.errors.username && 'is-invalid'}`}
                                     />
                                     <Form.Label htmlFor="username">Имя пользователя</Form.Label>
-                                    <Form.Control.Feedback type="invalid">Обязательное поле</Form.Control.Feedback>
+                                    <Form.Control.Feedback type="invalid">{formik.errors.username}</Form.Control.Feedback>
                                 </Form.Floating>
 
                                 <Form.Floating className="mb-3">
@@ -91,26 +107,26 @@ const SignUpPage = () => {
                                         aria-describedby="passwordHelpBlock"
                                         aria-autocomplete="list"
                                         required
-                                    // isInvalid={authFailed}
+                                        className={`${formik.errors.password && 'is-invalid'}`}
                                     />
                                     <Form.Label htmlFor="password">Пароль</Form.Label>
-                                    <Form.Control.Feedback type="invalid">Не менее 6 символов</Form.Control.Feedback>
+                                    <Form.Control.Feedback type="invalid">{formik.errors.password}</Form.Control.Feedback>
                                 </Form.Floating>
 
                                 <Form.Floating className="mb-4">
                                     <Form.Control
                                         onChange={formik.handleChange}
-                                        value={formik.values.password}
+                                        value={formik.values.confirmPassword}
                                         id="confirmPassword"
                                         type="password"
                                         placeholder="Пароли должны совпадать"
                                         name="confirmPassword"
                                         autoComplete="new-password"
                                         required
-                                    // isInvalid={authFailed}
+                                        className={`${formik.errors.confirmPassword && 'is-invalid'}`}
                                     />
                                     <Form.Label htmlFor="confirmPassword">Подтвердите пароль</Form.Label>
-                                    <Form.Control.Feedback type="invalid">Пароли должны совпадать</Form.Control.Feedback>
+                                    <Form.Control.Feedback type="invalid">{formik.errors.confirmPassword}</Form.Control.Feedback>
                                 </Form.Floating>
 
                                 <Button variant="outline-primary" type="submit" className="w-100 mb-3">
