@@ -5,7 +5,9 @@ import { addChannel } from "../../services/channelsSlice";
 import { setCurrentChannel } from "../../services/uiSlice";
 import axios from "axios";
 import routes from "../../routes";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { selectors as channelsSelectors } from '../../services/channelsSlice.js'
+import * as Yup from 'yup';
 
 const getAuthHeader = () => {
     const token = JSON.parse(localStorage.getItem('token'));
@@ -13,6 +15,7 @@ const getAuthHeader = () => {
 };
 
 const Add = ({ onHide, setCurrentChannelId }) => {
+    const channels = useSelector(channelsSelectors.selectAll);
     const dispatch = useDispatch();
     const inputRef = useRef();
 
@@ -20,10 +23,19 @@ const Add = ({ onHide, setCurrentChannelId }) => {
         inputRef.current.focus();
     }, []);
 
+    const channelAddingSchema = Yup.object().shape({
+        name: Yup.string()
+            .required('Обязательное поле')
+            .min(3, 'От 3 до 20 символов')
+            .max(20, 'От 3 до 20 символов')
+            .notOneOf(channels.map((channel) => channel.name), 'Должно быть уникальным')
+    });
+
     const formik = useFormik({
         initialValues: {
             name: '',
         },
+        validationSchema: channelAddingSchema,
         onSubmit: async (values) => {
             try {
                 const { data } = await axios.post(routes.channelsPath(), values, { headers: getAuthHeader() });
@@ -33,6 +45,7 @@ const Add = ({ onHide, setCurrentChannelId }) => {
                 onHide();
             } catch (err) {
                 formik.setSubmitting(false);
+                console.log('err: ', err);
                 throw err;
             }
         },
@@ -50,7 +63,7 @@ const Add = ({ onHide, setCurrentChannelId }) => {
                         <Form.Control
                             name="name"
                             id="name"
-                            className="mb-2"
+                            className={`mb-2 ${formik.errors.name && 'is-invalid'}`}
                             value={formik.values.name}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -59,7 +72,7 @@ const Add = ({ onHide, setCurrentChannelId }) => {
                             ref={inputRef}
                         />
                         <Form.Label className="visually-hidden" htmlFor="name">Имя канала</Form.Label>
-                        <Form.Control.Feedback type="invalid">От 3 до 20 символов</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">{formik.errors.name}</Form.Control.Feedback>
                     </Form.Group>
 
                     <Form.Group className="d-flex justify-content-end">
