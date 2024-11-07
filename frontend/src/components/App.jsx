@@ -13,6 +13,9 @@ import { logoutUser } from '../services/authSlice.js';
 import socket from '../socket.js';
 import { addChannel, removeChannel } from '../services/channelsSlice.js'
 import { addMessage } from '../services/messagesSlice.js'
+import resources from '../locales/index.js';
+import i18next from 'i18next';
+import { initReactI18next, useTranslation } from 'react-i18next';
 
 const AuthProvider = ({ children }) => {
     const hasToken = !!localStorage.getItem('token');
@@ -51,15 +54,26 @@ const PrivateRoute = ({ children }) => {
 
 const AuthButton = () => {
     const auth = useAuth();
-
+    const { t } = useTranslation();
     return (
-        auth.loggedIn && <Button onClick={auth.logOut}>Выйти</Button>
+        auth.loggedIn && <Button onClick={auth.logOut}>{t('navbar.logOutButton')}</Button>
     );
 };
 
 const App = () => {
+    i18next
+        .use(initReactI18next) // передаем экземпляр i18n в react-i18next, который сделает его доступным для всех компонентов через context API.
+        .init({
+            resources, // передаем переводы текстов интерфейса в формате JSON
+            fallbackLng: 'ru', // если переводы на языке пользователя недоступны, то будет использоваться язык, указанный в этом поле
+            interpolation: {
+                escapeValue: false, // экранирование уже есть в React, поэтому отключаем
+            },
+        });
+
     const dispatch = useDispatch();
-    
+    const { t } = useTranslation();
+
     useEffect(() => {
         socket.on('newMessage', (payload) => {
             console.log(payload); // => { body: "new message", channelId: 7, id: 8, username: "admin" }
@@ -91,7 +105,7 @@ const App = () => {
                 <Router>
                     <Navbar expand="lg" className="shadow-sm bg-white">
                         <Container>
-                            <Navbar.Brand href="/">Hexlet Chat</Navbar.Brand>
+                            <Navbar.Brand href="/">{t('navbar.homeLink')}</Navbar.Brand>
                             <AuthButton />
                         </Container>
                     </Navbar>
