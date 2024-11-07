@@ -5,6 +5,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { selectors as channelsSelectors, updateChannel } from '../../services/channelsSlice'
 import routes from '../../routes';
 import axios from 'axios';
+import * as Yup from 'yup';
+import { useTranslation } from 'react-i18next';
 
 const getAuthHeader = () => {
     const token = JSON.parse(localStorage.getItem('token'));
@@ -16,6 +18,7 @@ const Rename = ({ onHide, currentChannelId }) => {
     const channels = useSelector(channelsSelectors.selectAll);
     const currentChannel = channels.find((channel) => channel.id === currentChannelId);
     const inputRef = useRef();
+    const { t } = useTranslation();
 
     useEffect(() => {
         // Используем setTimeout, чтобы гарантировать, что элемент полностью смонтирован
@@ -24,10 +27,19 @@ const Rename = ({ onHide, currentChannelId }) => {
         }, 0);
     }, []);
 
+    const channelSchema = Yup.object().shape({
+        name: Yup.string()
+            .required(t('modal.errors.validation.required'))
+            .min(3, t('modal.errors.validation.minMax'))
+            .max(20, t('modal.errors.validation.minMax'))
+            .notOneOf(channels.map((channel) => channel.name), t('modal.errors.validation.unique'))
+    });
+
     const formik = useFormik({
         initialValues: {
             name: currentChannel.name,
         },
+        validationSchema: channelSchema,
         enableReinitialize: true,
         onSubmit: async (values) => {
             try {
@@ -45,7 +57,7 @@ const Rename = ({ onHide, currentChannelId }) => {
     return (
         <Modal show>
             <Modal.Header closeButton onHide={onHide}>
-                <Modal.Title className="h4">Переименовать канал</Modal.Title>
+                <Modal.Title className="h4">{t('modal.rename.heading')}</Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
@@ -55,19 +67,19 @@ const Rename = ({ onHide, currentChannelId }) => {
                             autoComplete="off"
                             name="name"
                             id="name"
-                            className="mb-2"
+                            className={`mb-2 ${formik.errors.name && 'is-invalid'}`}
                             required
                             ref={inputRef}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
                             value={formik.values.name}
                         />
-                        <Form.Label className="visually-hidden" htmlFor="name">Имя канала</Form.Label>
-                        <Form.Control.Feedback type="invalid">От 3 до 20 символов</Form.Control.Feedback>
+                        <Form.Label className="visually-hidden" htmlFor="name">{t('modal.name')}</Form.Label>
+                        <Form.Control.Feedback type="invalid">{formik.errors.name}</Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="d-flex justify-content-end">
-                        <Button className="me-2" variant="secondary" onClick={onHide}>Отменить</Button>
-                        <Button type="submit" variant="primary">Отправить</Button>
+                        <Button className="me-2" variant="secondary" onClick={onHide}>{t('modal.cancelBtn')}</Button>
+                        <Button type="submit" variant="primary">{t('modal.submitBtn')}</Button>
                     </Form.Group>
                 </Form>
             </Modal.Body>
