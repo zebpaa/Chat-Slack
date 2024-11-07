@@ -8,6 +8,7 @@ import routes from "../../routes";
 import { useDispatch, useSelector } from "react-redux";
 import { selectors as channelsSelectors } from '../../services/channelsSlice.js'
 import * as Yup from 'yup';
+import { useTranslation } from 'react-i18next';
 
 const getAuthHeader = () => {
     const token = JSON.parse(localStorage.getItem('token'));
@@ -18,24 +19,25 @@ const Add = ({ onHide, setCurrentChannelId }) => {
     const channels = useSelector(channelsSelectors.selectAll);
     const dispatch = useDispatch();
     const inputRef = useRef();
+    const { t } = useTranslation();
 
     useEffect(() => {
         inputRef.current.focus();
     }, []);
 
-    const channelAddingSchema = Yup.object().shape({
+    const channelSchema = Yup.object().shape({
         name: Yup.string()
-            .required('Обязательное поле')
-            .min(3, 'От 3 до 20 символов')
-            .max(20, 'От 3 до 20 символов')
-            .notOneOf(channels.map((channel) => channel.name), 'Должно быть уникальным')
+            .required(t('modal.errors.validation.required'))
+            .min(3, t('modal.errors.validation.minMax'))
+            .max(20, t('modal.errors.validation.minMax'))
+            .notOneOf(channels.map((channel) => channel.name), t('modal.errors.validation.unique'))
     });
 
     const formik = useFormik({
         initialValues: {
             name: '',
         },
-        validationSchema: channelAddingSchema,
+        validationSchema: channelSchema,
         onSubmit: async (values) => {
             try {
                 const { data } = await axios.post(routes.channelsPath(), values, { headers: getAuthHeader() });
@@ -54,7 +56,7 @@ const Add = ({ onHide, setCurrentChannelId }) => {
     return (
         <Modal show>
             <Modal.Header closeButton onHide={onHide}>
-                <Modal.Title className="h4">Добавить канал</Modal.Title>
+                <Modal.Title className="h4">{t('modal.add.heading')}</Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
@@ -71,13 +73,13 @@ const Add = ({ onHide, setCurrentChannelId }) => {
                             required
                             ref={inputRef}
                         />
-                        <Form.Label className="visually-hidden" htmlFor="name">Имя канала</Form.Label>
+                        <Form.Label className="visually-hidden" htmlFor="name">{t('modal.name')}</Form.Label>
                         <Form.Control.Feedback type="invalid">{formik.errors.name}</Form.Control.Feedback>
                     </Form.Group>
 
                     <Form.Group className="d-flex justify-content-end">
-                        <Button className="me-2" variant="secondary" onClick={onHide}>Отменить</Button>
-                        <Button type="submit" variant="primary">Отправить</Button>
+                        <Button className="me-2" variant="secondary" onClick={onHide}>{t('modal.cancelBtn')}</Button>
+                        <Button type="submit" variant="primary">{t('modal.submitBtn')}</Button>
                     </Form.Group>
                 </Form>
             </Modal.Body>
