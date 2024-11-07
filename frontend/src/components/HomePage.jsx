@@ -8,6 +8,7 @@ import { selectors as channelsSelectors, addChannels } from '../services/channel
 import { selectors as messagesSelectors, addMessages } from '../services/messagesSlice.js'
 import { setCurrentChannel } from '../services/uiSlice.js';
 import getModal from './modals/index.js';
+import { useTranslation } from 'react-i18next';
 
 const getAuthHeader = () => {
     const token = JSON.parse(localStorage.getItem('token'));
@@ -16,6 +17,7 @@ const getAuthHeader = () => {
 
 const HomePage = () => {
     const dispatch = useDispatch();
+    const { t } = useTranslation();
     const channels = useSelector(channelsSelectors.selectAll);
     const messages = useSelector(messagesSelectors.selectAll);
     const currentChannel = useSelector((state) => state.ui.currentChannelId);
@@ -66,21 +68,21 @@ const HomePage = () => {
 
     const renderUnremovableChannel = ({ id, name }) => (
         <Button className="w-100 rounded-0 text-start" variant={getVariant(id)}>
-            <span className="me-1">#</span>{name}
+            <span className="me-1">{t('homePage.prefix')}</span>{name}
         </Button>
     );
 
     const renderRemovableChannel = ({ name, id }) => (
         <Dropdown className="d-flex" as={ButtonGroup} >
             <Button variant={getVariant(id)} className="w-100 rounded-0 text-start text-truncate">
-                <span className="me-1">#</span>{name}
+                <span className="me-1">{t('homePage.prefix')}</span>{name}
             </Button >
             <Dropdown.Toggle className="flex-grow-0 btn" split id="dropdown-split-basic" variant={getVariant(id)} >
-                <span className="visually-hidden">Управление каналом</span>
+                <span className="visually-hidden">{t('homePage.channelControlBtn')}</span>
             </Dropdown.Toggle>
             <Dropdown.Menu>
-                <Dropdown.Item as={Button} href="#" onClick={() => showModal('removing', id)}>Удалить</Dropdown.Item>
-                <Dropdown.Item as={Button} href="#" onClick={() => showModal('renaming', id)}>Переименовать</Dropdown.Item>
+                <Dropdown.Item as={Button} href="#" onClick={() => showModal('removing', id)}>{t('homePage.remove')}</Dropdown.Item>
+                <Dropdown.Item as={Button} href="#" onClick={() => showModal('renaming', id)}>{t('homePage.rename')}</Dropdown.Item>
             </Dropdown.Menu>
         </Dropdown >
     );
@@ -102,13 +104,13 @@ const HomePage = () => {
             <Row className="h-100 bg-white flex-md-row">
                 <Col bsPrefix="col-4" className="col-md-2 border-end px-0 bg-light flex-column h-100 d-flex">
                     <div className="d-flex mt-1 justify-content-between mb-2 ps-4 pe-2 p-4">
-                        <b>Каналы</b>
+                        <b>{t('homePage.heading')}</b>
                         <Button variant="group-vertical" className="p-0 text-primary" onClick={() => showModal('adding')}>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
                                 <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
                                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
                             </svg>
-                            <span className="visually-hidden">+</span>
+                            <span className="visually-hidden">{t('homePage.addChannel')}</span>
                         </Button>
                         {renderModal({ modalInfo, hideModal, setCurrentChannelId, currentChannelId })}
                     </div>
