@@ -6,6 +6,7 @@ import { addMessage } from "../services/messagesSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import routes from "../routes.js";
+import { useTranslation } from "react-i18next";
 
 const MessageBox = ({ messages, currentChannelId }) => {
     const dispatch = useDispatch();
@@ -13,6 +14,7 @@ const MessageBox = ({ messages, currentChannelId }) => {
     const channels = useSelector(channelsSelectors.selectAll);
     const inputRef = useRef();
     const currentChannel = channels.find((channel) => channel.id === currentChannelId);
+    const { t } = useTranslation();
 
     useEffect(() => {
         inputRef.current.focus();
@@ -54,8 +56,12 @@ const MessageBox = ({ messages, currentChannelId }) => {
     return (
         <div className="d-flex flex-column h-100">
             <div className="bg-light mb-4 p-3 shadow-sm small">
-                <p className="m-0"><b># {currentChannel?.name || null}</b></p>
-                <span className="text-muted">{renderMessages().length} сообщений</span>
+                <p className="m-0">
+                    <b>{t('homePage.prefix')} {currentChannel?.name || null}</b>
+                </p>
+                <span className="text-muted">
+                    {t('homePage.messageCount.keyWithCount', { count: renderMessages().length || 0 })}
+                </span>
             </div>
             <div id="messages-box" className="chat-messages overflow-auto px-5 ">
                 {renderMessages()}
@@ -65,8 +71,8 @@ const MessageBox = ({ messages, currentChannelId }) => {
                     <Form.Group className="input-group has-validation">
                         <Form.Control
                             name="body"
-                            aria-label="Новое сообщение"
-                            placeholder="Введите сообщение..."
+                            aria-label={t('homePage.inputLabel')}
+                            placeholder={t('homePage.inputMessage')}
                             className="border-0 p-0 ps-2 form-control"
                             value={formik.values.body}
                             onChange={formik.handleChange}
@@ -75,7 +81,7 @@ const MessageBox = ({ messages, currentChannelId }) => {
                         <Button variant="group-vertical" type="submit" disabled={!formik.dirty}>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
                                 <path fillRule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z"></path></svg>
-                            <span className="visually-hidden">Отправить</span>
+                            <span className="visually-hidden">{t('homePage.sendMessageBtn')}</span>
                         </Button>
                     </Form.Group>
                 </Form>
