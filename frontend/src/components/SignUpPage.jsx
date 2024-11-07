@@ -11,12 +11,14 @@ import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { loginUser } from '../services/authSlice.js';
 import * as Yup from 'yup';
+import { useTranslation } from 'react-i18next';
 
 const SignUpPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const auth = useAuth();
     const inputRef = useRef();
+    const { t } = useTranslation();
 
     useEffect(() => {
         inputRef.current.focus();
@@ -24,15 +26,15 @@ const SignUpPage = () => {
 
     const signUpSchema = Yup.object().shape({
         username: Yup.string()
-            .required('Обязательное поле')
-            .min(3, 'От 3 до 20 символов')
-            .max(20, 'От 3 до 20 символов'),
+            .required(t('loginAndSignUp.errors.validation.required'))
+            .min(3, t('loginAndSignUp.errors.validation.nameSymbols'))
+            .max(20, t('loginAndSignUp.errors.validation.nameSymbols')),
         password: Yup.string()
-            .required('Обязательное поле')
-            .min(6, 'Не менее 6 символов'),
+            .required(t('loginAndSignUp.errors.validation.required'))
+            .min(6, t('loginAndSignUp.errors.validation.pasMinSymbols')),
         confirmPassword: Yup.string()
-            .required('Обязательное поле')
-            .oneOf([Yup.ref('password')], 'Пароли должны совпадать'),
+            .required(t('loginAndSignUp.errors.validation.required'))
+            .oneOf([Yup.ref('password')], t('loginAndSignUp.errors.validation.confirmPassword')),
     });
 
     const formik = useFormik({
@@ -54,7 +56,7 @@ const SignUpPage = () => {
                 formik.setSubmitting(false);
 
                 if (err.isAxiosError && err.response.status === 409) {
-                    console.log('Такой пользователь уже существует');
+                    console.log(t('loginAndSignUp.errors.validation.status409'));
                 }
 
                 if (err.isAxiosError && err.response.status === 401) {
@@ -77,7 +79,7 @@ const SignUpPage = () => {
                                 <Image alt="Регистрация" src="/images/signup-avatar.jpg" roundedCircle />
                             </div>
                             <Form className="w-50" onSubmit={formik.handleSubmit}>
-                                <h1 className="text-center mb-4">Регистрация</h1>
+                                <h1 className="text-center mb-4">{t('loginAndSignUp.headingSignUp')}</h1>
                                 <Form.Floating className="mb-3">
                                     <Form.Control
                                         type="username"
@@ -86,12 +88,12 @@ const SignUpPage = () => {
                                         name="username"
                                         autoComplete="username"
                                         value={formik.values.username}
-                                        placeholder="От 3 до 20 символов"
+                                        placeholder={t('loginAndSignUp.usernameSignUp')}
                                         ref={inputRef}
                                         required
                                         className={`${formik.errors.username && 'is-invalid'}`}
                                     />
-                                    <Form.Label htmlFor="username">Имя пользователя</Form.Label>
+                                    <Form.Label htmlFor="username">{t('loginAndSignUp.usernameSignUp')}</Form.Label>
                                     <Form.Control.Feedback type="invalid">{formik.errors.username}</Form.Control.Feedback>
                                 </Form.Floating>
 
@@ -101,7 +103,7 @@ const SignUpPage = () => {
                                         value={formik.values.password}
                                         id="password"
                                         type="password"
-                                        placeholder="Не менее 6 символов"
+                                        placeholder={t('loginAndSignUp.password')}
                                         name="password"
                                         autoComplete="new-password"
                                         aria-describedby="passwordHelpBlock"
@@ -109,7 +111,7 @@ const SignUpPage = () => {
                                         required
                                         className={`${formik.errors.password && 'is-invalid'}`}
                                     />
-                                    <Form.Label htmlFor="password">Пароль</Form.Label>
+                                    <Form.Label htmlFor="password">{t('loginAndSignUp.password')}</Form.Label>
                                     <Form.Control.Feedback type="invalid">{formik.errors.password}</Form.Control.Feedback>
                                 </Form.Floating>
 
@@ -119,18 +121,18 @@ const SignUpPage = () => {
                                         value={formik.values.confirmPassword}
                                         id="confirmPassword"
                                         type="password"
-                                        placeholder="Пароли должны совпадать"
+                                        placeholder={t('loginAndSignUp.confirmPassword')}
                                         name="confirmPassword"
                                         autoComplete="new-password"
                                         required
                                         className={`${formik.errors.confirmPassword && 'is-invalid'}`}
                                     />
-                                    <Form.Label htmlFor="confirmPassword">Подтвердите пароль</Form.Label>
+                                    <Form.Label htmlFor="confirmPassword">{t('loginAndSignUp.confirmPassword')}</Form.Label>
                                     <Form.Control.Feedback type="invalid">{formik.errors.confirmPassword}</Form.Control.Feedback>
                                 </Form.Floating>
 
                                 <Button variant="outline-primary" type="submit" className="w-100 mb-3">
-                                    Зарегистрироваться
+                                    {t('loginAndSignUp.signupBtn')}
                                 </Button>
                             </Form>
                         </Card.Body>
