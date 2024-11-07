@@ -11,7 +11,7 @@ import {
 import useAuth from '../hooks/index.jsx';
 import { loginUser } from '../services/authSlice.js';
 import { useDispatch } from 'react-redux';
-
+import { useTranslation } from 'react-i18next';
 
 const LoginPage = () => {
     const auth = useAuth();
@@ -19,7 +19,7 @@ const LoginPage = () => {
     const inputRef = useRef();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
+    const { t } = useTranslation();
     useEffect(() => {
         inputRef.current.focus();
     }, []);
@@ -61,21 +61,21 @@ const LoginPage = () => {
                                 <Image src="/images/login-avatar.jpeg" alt="Войти" roundedCircle />
                             </Col>
                             <Form className="col-12 col-md-6 mt-3 mt-md-0" onSubmit={formik.handleSubmit}>
-                                <h1 className="text-center mb-4">Войти</h1>
+                                <h1 className="text-center mb-4">{t('loginAndSignUp.heading')}</h1>
                                 <Form.Floating className="mb-3">
                                     <Form.Control
                                         type="username"
                                         id="username"
                                         onChange={formik.handleChange}
                                         value={formik.values.username}
-                                        placeholder="Ваш ник"
+                                        placeholder={t('loginAndSignUp.username')}
                                         ref={inputRef}
                                         name="username"
                                         autoComplete="username"
                                         required
                                         isInvalid={authFailed}
                                     />
-                                    <Form.Label htmlFor="username">Ваш ник</Form.Label>
+                                    <Form.Label htmlFor="username">{t('loginAndSignUp.username')}</Form.Label>
                                 </Form.Floating>
 
                                 <Form.Floating className="mb-4">
@@ -84,23 +84,23 @@ const LoginPage = () => {
                                         value={formik.values.password}
                                         id="password"
                                         type="password"
-                                        placeholder="Пароль"
+                                        placeholder={t('loginAndSignUp.password')}
                                         name="password"
                                         autoComplete="current-password"
                                         required
                                         isInvalid={authFailed}
                                     />
-                                    <Form.Label htmlFor="password" className="mb-4">Пароль</Form.Label>
-                                    <Form.Control.Feedback type="invalid">Неверные имя пользователя или пароль</Form.Control.Feedback>
+                                    <Form.Label htmlFor="password" className="mb-4">{t('loginAndSignUp.password')}</Form.Label>
+                                    <Form.Control.Feedback type="invalid">{t('loginAndSignUp.errors.validation.wrongData')}</Form.Control.Feedback>
                                 </Form.Floating>
                                 <Button variant="outline-primary" type="submit" className="w-100 mb-3">
-                                    Войти
+                                    {t('loginAndSignUp.loginBtn')}
                                 </Button>
                             </Form>
                         </Card.Body>
                         <Card.Footer className="p-4">
                             <div className="text-center">
-                                <span>Нет аккаунта?</span> <Link to="/signup">Регистрация</Link>
+                                <span>{t('loginAndSignUp.footerSpan')}</span> <Link to="/signup">{t('loginAndSignUp.linkSignUp')}</Link>
                             </div>
                         </Card.Footer>
                     </Card>
