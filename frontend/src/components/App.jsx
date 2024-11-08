@@ -16,6 +16,8 @@ import { addMessage } from '../services/messagesSlice.js'
 import resources from '../locales/index.js';
 import i18next from 'i18next';
 import { initReactI18next, useTranslation } from 'react-i18next';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 const AuthProvider = ({ children }) => {
     const hasToken = !!localStorage.getItem('token');
@@ -62,12 +64,12 @@ const AuthButton = () => {
 
 const App = () => {
     i18next
-        .use(initReactI18next) // передаем экземпляр i18n в react-i18next, который сделает его доступным для всех компонентов через context API.
+        .use(initReactI18next)
         .init({
-            resources, // передаем переводы текстов интерфейса в формате JSON
-            fallbackLng: 'ru', // если переводы на языке пользователя недоступны, то будет использоваться язык, указанный в этом поле
+            resources,
+            fallbackLng: 'ru',
             interpolation: {
-                escapeValue: false, // экранирование уже есть в React, поэтому отключаем
+                escapeValue: false,
             },
         });
 
@@ -125,7 +127,7 @@ const App = () => {
                     </Routes>
                 </Router>
             </div>
-            <div className="Toastify"></div>
+            <ToastContainer closeOnClick />
         </AuthProvider>
     );
 }
