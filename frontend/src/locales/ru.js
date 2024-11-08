@@ -74,5 +74,12 @@ export default {
         },
       },
     },
+    toasts: {
+      createChannel: 'Канал создан',
+      removeChannel: 'Канал удалён',
+      renameChannel: 'Канал переименован',
+      fetchError: 'Ошибка сети',
+      otherError: 'Ошибка в загрузке данных',
+    },
   },
 };
