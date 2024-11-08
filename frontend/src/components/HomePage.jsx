@@ -81,8 +81,8 @@ const HomePage = () => {
                 <span className="visually-hidden">{t('homePage.channelControlBtn')}</span>
             </Dropdown.Toggle>
             <Dropdown.Menu>
-                <Dropdown.Item as={Button} href="#" onClick={() => showModal('removing', id)}>{t('homePage.remove')}</Dropdown.Item>
-                <Dropdown.Item as={Button} href="#" onClick={() => showModal('renaming', id)}>{t('homePage.rename')}</Dropdown.Item>
+                <Dropdown.Item as={Button} onClick={() => showModal('removing', id)}>{t('homePage.remove')}</Dropdown.Item>
+                <Dropdown.Item as={Button} onClick={() => showModal('renaming', id)}>{t('homePage.rename')}</Dropdown.Item>
             </Dropdown.Menu>
         </Dropdown >
     );
