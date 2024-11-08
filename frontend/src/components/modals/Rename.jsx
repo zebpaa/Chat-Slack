@@ -7,6 +7,7 @@ import routes from '../../routes';
 import axios from 'axios';
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 
 const getAuthHeader = () => {
     const token = JSON.parse(localStorage.getItem('token'));
@@ -35,6 +36,7 @@ const Rename = ({ onHide, currentChannelId }) => {
             .notOneOf(channels.map((channel) => channel.name), t('modal.errors.validation.unique'))
     });
 
+
     const formik = useFormik({
         initialValues: {
             name: currentChannel.name,
@@ -42,7 +44,10 @@ const Rename = ({ onHide, currentChannelId }) => {
         validationSchema: channelSchema,
         enableReinitialize: true,
         onSubmit: async (values) => {
+            const nostifySuccess = () => toast.success(t('toasts.renameChannel'));
+            const nostifyError = () => { };
             try {
+                nostifySuccess();
                 const newChannel = { changes: { name: values.name }, id: currentChannelId };
                 await axios.patch(routes.channelPath(currentChannelId), values, { headers: getAuthHeader() })
                 dispatch(updateChannel(newChannel));

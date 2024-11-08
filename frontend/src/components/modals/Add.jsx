@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectors as channelsSelectors } from '../../services/channelsSlice.js'
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 
 const getAuthHeader = () => {
     const token = JSON.parse(localStorage.getItem('token'));
@@ -39,17 +40,30 @@ const Add = ({ onHide, setCurrentChannelId }) => {
         },
         validationSchema: channelSchema,
         onSubmit: async (values) => {
+            const notifySuccess = () => toast.success(t('toasts.createChannel'));
+            const notifyError = (type) => {
+                switch (type) {
+                    case 'FETCH_ERROR':
+                        return toast.error(t('toasts.fetchError'));
+                    default:
+                        return toast.error(t('toasts.otherError'));
+                }
+            };
             try {
                 const { data } = await axios.post(routes.channelsPath(), values, { headers: getAuthHeader() });
+                notifySuccess();
                 setCurrentChannelId(data.id);
                 dispatch(addChannel(data));
                 dispatch(setCurrentChannel(data.id));
-                onHide();
+
             } catch (err) {
                 formik.setSubmitting(false);
+                
+                notifyError(err.status);
                 console.log('err: ', err);
                 throw err;
             }
+            onHide();
         },
     });
 
