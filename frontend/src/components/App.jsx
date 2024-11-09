@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { Navbar, Container, Button } from "react-bootstrap";
@@ -8,16 +7,22 @@ import SignUpPage from "./SignUpPage";
 import AuthContext from '../contexts/AuthContext';
 import useAuth from '../hooks/index.jsx';
 import HomePage from './HomePage.jsx';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../services/authSlice.js';
-import socket from '../socket.js';
-import { addChannel, removeChannel } from '../services/channelsSlice.js'
+import { addChannel, removeChannel, updateChannel } from '../services/channelsSlice.js'
 import { addMessage } from '../services/messagesSlice.js'
+import { setCurrentChannel } from '../services/uiSlice.js';
+import socket from '../socket.js';
 import resources from '../locales/index.js';
 import i18next from 'i18next';
 import { initReactI18next, useTranslation } from 'react-i18next';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
+import filter from 'leo-profanity';
+
+filter.clearList();
+filter.add(filter.getDictionary('en'));
+filter.add(filter.getDictionary('ru'));
 
 const AuthProvider = ({ children }) => {
     const hasToken = !!localStorage.getItem('token');
@@ -75,23 +80,25 @@ const App = () => {
 
     const dispatch = useDispatch();
     const { t } = useTranslation();
+    const defaultChannelId = useSelector((state) => state.ui.defaultChannelId);
 
     useEffect(() => {
         socket.on('newMessage', (payload) => {
-            console.log(payload); // => { body: "new message", channelId: 7, id: 8, username: "admin" }
             dispatch(addMessage(payload));
         });
         socket.on('newChannel', (payload) => {
-            console.log(payload) // { id: 6, name: "new channel", removable: true }
             dispatch(addChannel(payload));
         });
         socket.on('removeChannel', (payload) => {
-            console.log(payload); // { id: 6 };
-            dispatch(removeChannel(payload));
+            console.log(payload.id); // { id: 6 };
+            console.log('defaultChannelId: ', defaultChannelId)
+            dispatch(setCurrentChannel(defaultChannelId)); // показывается пустой канал, если удалить в другом браузере 
+            dispatch(removeChannel(payload.id));
+
         });
-        // socket.on('renameChannel', (payload) => {
-        //     console.log(payload); // { id: 7, name: "new name channel", removable: true }
-        // });
+        socket.on('renameChannel', (payload) => {
+            dispatch(updateChannel({ changes: { name: payload.name }, id: payload.id }))
+        });
 
         return () => {
             socket.off('newMessage');
@@ -99,7 +106,7 @@ const App = () => {
             socket.off('removeChannel');
             socket.off('renameChannel');
         };
-    }, [dispatch]);
+    }, [socket]);
 
     return (
         <AuthProvider>
