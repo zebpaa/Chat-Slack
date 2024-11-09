@@ -79,7 +79,7 @@ const HomePage = () => {
                 <span className="me-1">{t('homePage.prefix')}</span>{filter.clean(name)}
             </Button >
             <Dropdown.Toggle className="flex-grow-0 btn" split id="dropdown-split-basic" variant={getVariant(id)} >
-                <span className="visually-hidden">{t('homePage.channelControlBtn')}</span>
+                <span className="visually-hidden">{t('homePage.channelСontrolBtn')}</span>
             </Dropdown.Toggle>
             <Dropdown.Menu>
                 <Dropdown.Item as={Button} onClick={() => showModal('removing', id)}>{t('homePage.remove')}</Dropdown.Item>
