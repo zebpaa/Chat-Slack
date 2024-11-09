@@ -6,7 +6,7 @@ import store from './services/index.js';
 
 const root = ReactDOM.createRoot(document.getElementById('chat'));
 root.render(
-    <Provider store={store}>
-        <App />
-    </Provider>
+	<Provider store={store}>
+		<App />
+	</Provider>
 );

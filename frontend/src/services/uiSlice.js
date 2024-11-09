@@ -1,12 +1,12 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  defaultChannelId: "1",
-  currentChannelId: "1",
+  defaultChannelId: '1',
+  currentChannelId: '1',
 };
 
 const uiSlice = createSlice({
-  name: "ui",
+  name: 'ui',
   initialState,
   reducers: {
     setCurrentChannel: (state, { payload }) => {
