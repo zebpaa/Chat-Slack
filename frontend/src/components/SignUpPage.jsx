@@ -56,7 +56,7 @@ const SignUpPage = () => {
                 formik.setSubmitting(false);
 
                 if (err.isAxiosError && err.response.status === 409) {
-                    console.log(t('loginAndSignUp.errors.validation.status409'));
+                    formik.errors.confirmPassword = t('loginAndSignUp.errors.validation.status409');
                 }
 
                 if (err.isAxiosError && err.response.status === 401) {
