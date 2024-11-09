@@ -1,6 +1,6 @@
 ### Hexlet tests and linter status:
 
-[![Actions Status](https://github.com/zebpaa/frontend-project-12/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/zebpaa/frontend-project-12/actions)
+[![Actions Status](https://github.com/zebpaa/frontend-project-12/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/zebpaa/frontend-project-12/actions) [![Maintainability](https://api.codeclimate.com/v1/badges/acf88ef44e3e7913a02e/maintainability)](https://codeclimate.com/github/zebpaa/frontend-project-12/maintainability)
 
 ## Website
 
