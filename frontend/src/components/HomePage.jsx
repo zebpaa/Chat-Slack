@@ -9,6 +9,7 @@ import { selectors as messagesSelectors, addMessages } from '../services/message
 import { setCurrentChannel } from '../services/uiSlice.js';
 import getModal from './modals/index.js';
 import { useTranslation } from 'react-i18next';
+import filter from 'leo-profanity';
 
 const getAuthHeader = () => {
     const token = JSON.parse(localStorage.getItem('token'));
@@ -68,14 +69,14 @@ const HomePage = () => {
 
     const renderUnremovableChannel = ({ id, name }) => (
         <Button className="w-100 rounded-0 text-start" variant={getVariant(id)}>
-            <span className="me-1">{t('homePage.prefix')}</span>{name}
+            <span className="me-1">{t('homePage.prefix')}</span>{filter.clean(name)}
         </Button>
     );
 
     const renderRemovableChannel = ({ name, id }) => (
         <Dropdown className="d-flex" as={ButtonGroup} >
             <Button variant={getVariant(id)} className="w-100 rounded-0 text-start text-truncate">
-                <span className="me-1">{t('homePage.prefix')}</span>{name}
+                <span className="me-1">{t('homePage.prefix')}</span>{filter.clean(name)}
             </Button >
             <Dropdown.Toggle className="flex-grow-0 btn" split id="dropdown-split-basic" variant={getVariant(id)} >
                 <span className="visually-hidden">{t('homePage.channelControlBtn')}</span>
