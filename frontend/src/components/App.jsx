@@ -19,6 +19,12 @@ import { initReactI18next, useTranslation } from 'react-i18next';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 import filter from 'leo-profanity';
+import { Provider, ErrorBoundary } from '@rollbar/react';
+
+const rollbarConfig = {
+    accessToken: import.meta.env.VITE_ROLLBAR_ACCESS_TOKEN,
+    environment: 'testenv',
+};
 
 filter.clearList();
 filter.add(filter.getDictionary('en'));
@@ -45,7 +51,11 @@ const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ loggedIn, logIn, logOut }}>
-            {children}
+            <Provider config={rollbarConfig}>
+                <ErrorBoundary>
+                    {children}
+                </ErrorBoundary>
+            </Provider>
         </AuthContext.Provider>
     );
 };
