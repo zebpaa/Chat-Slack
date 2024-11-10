@@ -8,6 +8,7 @@ import filter from 'leo-profanity';
 import routes from '../routes.js';
 import { addMessage } from '../services/messagesSlice.js';
 import { selectors as channelsSelectors } from '../services/channelsSlice.js';
+import getAuthHeader from '../utils/utils.js';
 
 const MessageBox = ({ messages, currentChannelId }) => {
   const dispatch = useDispatch();
@@ -21,17 +22,12 @@ const MessageBox = ({ messages, currentChannelId }) => {
     inputRef.current.focus();
   }, [currentChannelId]);
 
-  const getAuthHeader = () => {
-    const token = JSON.parse(localStorage.getItem('token'));
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
-
   const formik = useFormik({
     initialValues: { body: '', channelId: currentChannelId, username },
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        const res = await axios.post(routes.messagesPath(), values, { headers: getAuthHeader() });
+        const res = await axios.post(routes.messagesPath(), values, getAuthHeader());
         dispatch(addMessage(res.data));
         formik.setSubmitting(true);
         formik.resetForm();

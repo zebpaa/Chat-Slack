@@ -12,11 +12,7 @@ import { selectors as channelsSelectors, addChannels } from '../services/channel
 import { selectors as messagesSelectors, addMessages } from '../services/messagesSlice.js';
 import { setCurrentChannel } from '../services/uiSlice.js';
 import getModal from './modals/index.js';
-
-const getAuthHeader = () => {
-  const token = JSON.parse(localStorage.getItem('token'));
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+import getAuthHeader from '../utils/utils.js';
 
 const renderModal = ({
   modalInfo, hideModal, setCurrentChannelId, currentChannelId,
@@ -50,7 +46,7 @@ const HomePage = () => {
 
   useEffect(() => {
     const fetchChannels = async () => {
-      const { data } = await axios.get(routes.channelsPath(), { headers: getAuthHeader() });
+      const { data } = await axios.get(routes.channelsPath(), getAuthHeader());
       dispatch(addChannels(data));
     };
 
@@ -59,7 +55,7 @@ const HomePage = () => {
 
   useEffect(() => {
     const fetchMessages = async () => {
-      const { data } = await axios.get(routes.messagesPath(), { headers: getAuthHeader() });
+      const { data } = await axios.get(routes.messagesPath(), getAuthHeader());
       dispatch(addMessages(data));
     };
 
