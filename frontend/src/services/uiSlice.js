@@ -9,9 +9,11 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    setCurrentChannel: (state, { payload }) => {
-      state.currentChannelId = payload;
-    },
+    setCurrentChannel: (state, { payload }) => ({
+      ...state,
+      currentChannelId: payload,
+      defaultChannelId: '1',
+    }),
   },
 });
 

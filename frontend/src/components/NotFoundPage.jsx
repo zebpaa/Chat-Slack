@@ -6,10 +6,13 @@ const NotFoundPage = () => {
   const { t } = useTranslation();
 
   return (
-    <div className='text-center'>
-      <Image fluid className='h-25' alt='Страница не найдена' src='/images/not-found-avatar.svg' />
-      <h1 className='h4 text-muted'>{t('notFoundPage.heading')}</h1>
-      <p className='text-muted'>{t('notFoundPage.body')}<Link to='/'>{t('notFoundPage.homeLink')}</Link></p>
+    <div className="text-center">
+      <Image fluid className="h-25" alt="Страница не найдена" src="/images/not-found-avatar.svg" />
+      <h1 className="h4 text-muted">{t('notFoundPage.heading')}</h1>
+      <p className="text-muted">
+        {t('notFoundPage.body')}
+        <Link to="/">{t('notFoundPage.homeLink')}</Link>
+      </p>
     </div>
   );
 };

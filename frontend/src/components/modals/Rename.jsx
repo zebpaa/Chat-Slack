@@ -2,16 +2,16 @@ import React, { useEffect, useRef } from 'react';
 import { useFormik } from 'formik';
 import { Modal, Form, Button } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectors as channelsSelectors, updateChannel } from '../../services/channelsSlice'
-import routes from '../../routes';
 import axios from 'axios';
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
+import routes from '../../routes';
+import { selectors as channelsSelectors, updateChannel } from '../../services/channelsSlice';
 
 const getAuthHeader = () => {
   const token = JSON.parse(localStorage.getItem('token'));
-  return token ? { Authorization: `Bearer ${token}` } : {}
+  return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 const Rename = ({ onHide, currentChannelId }) => {
@@ -23,9 +23,7 @@ const Rename = ({ onHide, currentChannelId }) => {
 
   useEffect(() => {
     // Используем setTimeout, чтобы гарантировать, что элемент полностью смонтирован
-    setTimeout(() => {
-      inputRef.current && inputRef.current.select();
-    }, 0);
+    setTimeout(() => inputRef.current && inputRef.current.select(), 0);
   }, []);
 
   const channelSchema = Yup.object().shape({
@@ -33,9 +31,8 @@ const Rename = ({ onHide, currentChannelId }) => {
       .required(t('modal.errors.validation.required'))
       .min(3, t('modal.errors.validation.minMax'))
       .max(20, t('modal.errors.validation.minMax'))
-      .notOneOf(channels.map((channel) => channel.name), t('modal.errors.validation.unique'))
+      .notOneOf(channels.map((channel) => channel.name), t('modal.errors.validation.unique')),
   });
-
 
   const formik = useFormik({
     initialValues: {
@@ -45,11 +42,15 @@ const Rename = ({ onHide, currentChannelId }) => {
     enableReinitialize: true,
     onSubmit: async (values) => {
       const nostifySuccess = () => toast.success(t('toasts.renameChannel'));
-      const nostifyError = () => { };
+      // const nostifyError = () => { };
       try {
         nostifySuccess();
         const newChannel = { changes: { name: values.name }, id: currentChannelId };
-        await axios.patch(routes.channelPath(currentChannelId), values, { headers: getAuthHeader() })
+        await axios.patch(
+          routes.channelPath(currentChannelId),
+          values,
+          { headers: getAuthHeader() },
+        );
         dispatch(updateChannel(newChannel));
         onHide();
       } catch (err) {
@@ -62,16 +63,16 @@ const Rename = ({ onHide, currentChannelId }) => {
   return (
     <Modal show>
       <Modal.Header closeButton onHide={onHide}>
-        <Modal.Title className='h4'>{t('modal.rename.heading')}</Modal.Title>
+        <Modal.Title className="h4">{t('modal.rename.heading')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         <Form onSubmit={formik.handleSubmit}>
           <Form.Group>
             <Form.Control
-              autoComplete='off'
-              name='name'
-              id='name'
+              autoComplete="off"
+              name="name"
+              id="name"
               className={`mb-2 ${formik.errors.name && 'is-invalid'}`}
               required
               ref={inputRef}
@@ -79,12 +80,12 @@ const Rename = ({ onHide, currentChannelId }) => {
               onBlur={formik.handleBlur}
               value={formik.values.name}
             />
-            <Form.Label className='visually-hidden' htmlFor='name'>{t('modal.name')}</Form.Label>
-            <Form.Control.Feedback type='invalid'>{formik.errors.name}</Form.Control.Feedback>
+            <Form.Label className="visually-hidden" htmlFor="name">{t('modal.name')}</Form.Label>
+            <Form.Control.Feedback type="invalid">{formik.errors.name}</Form.Control.Feedback>
           </Form.Group>
-          <Form.Group className='d-flex justify-content-end'>
-            <Button className='me-2' variant='secondary' onClick={onHide}>{t('modal.cancelBtn')}</Button>
-            <Button type='submit' variant='primary'>{t('modal.submitBtn')}</Button>
+          <Form.Group className="d-flex justify-content-end">
+            <Button className="me-2" variant="secondary" onClick={onHide}>{t('modal.cancelBtn')}</Button>
+            <Button type="submit" variant="primary">{t('modal.submitBtn')}</Button>
           </Form.Group>
         </Form>
       </Modal.Body>

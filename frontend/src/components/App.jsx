@@ -1,25 +1,29 @@
-import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import {
+  useEffect, useState, useCallback, useMemo,
+} from 'react';
+import {
+  BrowserRouter as Router, Routes, Route, useLocation, Navigate,
+} from 'react-router-dom';
 import { Navbar, Container, Button } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import i18next from 'i18next';
+import { initReactI18next, useTranslation } from 'react-i18next';
+import { ToastContainer } from 'react-toastify';
+import filter from 'leo-profanity';
+import { Provider, ErrorBoundary } from '@rollbar/react';
 import LoginPage from './LoginPage';
 import NotFoundPage from './NotFoundPage';
 import SignUpPage from './SignUpPage';
 import AuthContext from '../contexts/AuthContext';
 import useAuth from '../hooks/index.jsx';
 import HomePage from './HomePage.jsx';
-import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../services/authSlice.js';
-import { addChannel, removeChannel, updateChannel } from '../services/channelsSlice.js'
-import { addMessage } from '../services/messagesSlice.js'
+import { addChannel, removeChannel, updateChannel } from '../services/channelsSlice.js';
+import { addMessage } from '../services/messagesSlice.js';
 import { setCurrentChannel } from '../services/uiSlice.js';
 import socket from '../socket.js';
 import resources from '../locales/index.js';
-import i18next from 'i18next';
-import { initReactI18next, useTranslation } from 'react-i18next';
-import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
-import filter from 'leo-profanity';
-import { Provider, ErrorBoundary } from '@rollbar/react';
 
 const rollbarConfig = {
   accessToken: import.meta.env.VITE_ROLLBAR_ACCESS_TOKEN,
@@ -35,22 +39,32 @@ const AuthProvider = ({ children }) => {
   const [loggedIn, setLoggedIn] = useState(hasToken);
   const dispatch = useDispatch();
 
-  const logIn = () => setLoggedIn(true);
-  const logOut = () => {
+  const logIn = useCallback(() => {
+    setLoggedIn(true);
+  }, []);
+
+  const logOut = useCallback(() => {
     localStorage.removeItem('username');
     localStorage.removeItem('token');
     dispatch(logoutUser());
     setLoggedIn(false);
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     const user = localStorage.getItem('username');
     const token = localStorage.getItem('token');
-    user && token ? logIn() : logOut();
-  }, []);
+    if (user && token) {
+      logIn();
+    } else {
+      logOut();
+    }
+  }, [logIn, logOut]);
+
+  // Используем useMemo для мемоизации объекта value
+  const value = useMemo(() => ({ loggedIn, logIn, logOut }), [loggedIn, logIn, logOut]);
 
   return (
-    <AuthContext.Provider value={{ loggedIn, logIn, logOut }}>
+    <AuthContext.Provider value={value}>
       <Provider config={rollbarConfig}>
         <ErrorBoundary>
           {children}
@@ -65,9 +79,9 @@ const PrivateRoute = ({ children }) => {
   const location = useLocation();
 
   return (
-    auth.loggedIn ? children : <Navigate to='/login' state={{ from: location }} />
+    auth.loggedIn ? children : <Navigate to="/login" state={{ from: location }} />
   );
-}
+};
 
 const AuthButton = () => {
   const auth = useAuth();
@@ -101,13 +115,12 @@ const App = () => {
     });
     socket.on('removeChannel', (payload) => {
       console.log(payload.id); // { id: 6 };
-      console.log('defaultChannelId: ', defaultChannelId)
-      dispatch(setCurrentChannel(defaultChannelId)); // показывается пустой канал, если удалить в другом браузере 
+      console.log('defaultChannelId: ', defaultChannelId);
+      dispatch(setCurrentChannel(defaultChannelId));
       dispatch(removeChannel(payload.id));
-
     });
     socket.on('renameChannel', (payload) => {
-      dispatch(updateChannel({ changes: { name: payload.name }, id: payload.id }))
+      dispatch(updateChannel({ changes: { name: payload.name }, id: payload.id }));
     });
 
     return () => {
@@ -116,25 +129,25 @@ const App = () => {
       socket.off('removeChannel');
       socket.off('renameChannel');
     };
-  }, [socket]);
+  }, [dispatch, defaultChannelId]);
 
   return (
     <AuthProvider>
-      <div className='d-flex flex-column h-100'>
+      <div className="d-flex flex-column h-100">
         <Router>
-          <Navbar expand='lg' className='shadow-sm bg-white'>
+          <Navbar expand="lg" className="shadow-sm bg-white">
             <Container>
-              <Navbar.Brand href='/'>{t('navbar.homeLink')}</Navbar.Brand>
+              <Navbar.Brand href="/">{t('navbar.homeLink')}</Navbar.Brand>
               <AuthButton />
             </Container>
           </Navbar>
 
           <Routes>
-            <Route path='/login' element={<LoginPage />} />
-            <Route path='/signup' element={<SignUpPage />} />
-            <Route path='*' element={<NotFoundPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="*" element={<NotFoundPage />} />
             <Route
-              path='/'
+              path="/"
               element={(
                 <PrivateRoute>
                   <HomePage />
@@ -147,6 +160,6 @@ const App = () => {
       <ToastContainer closeOnClick />
     </AuthProvider>
   );
-}
+};
 
 export default App;

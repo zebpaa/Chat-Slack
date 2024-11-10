@@ -1,19 +1,18 @@
 import { Modal, Button, Form } from 'react-bootstrap';
 import { useFormik } from 'formik';
 import { useEffect, useRef } from 'react';
-import { addChannel } from '../../services/channelsSlice';
-import { setCurrentChannel } from '../../services/uiSlice';
 import axios from 'axios';
-import routes from '../../routes';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectors as channelsSelectors } from '../../services/channelsSlice.js'
 import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
+import { selectors as channelsSelectors, addChannel } from '../../services/channelsSlice.js';
+import routes from '../../routes';
+import { setCurrentChannel } from '../../services/uiSlice';
 
 const getAuthHeader = () => {
   const token = JSON.parse(localStorage.getItem('token'));
-  return token ? { Authorization: `Bearer ${token}` } : {}
+  return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 const Add = ({ onHide, setCurrentChannelId }) => {
@@ -31,7 +30,7 @@ const Add = ({ onHide, setCurrentChannelId }) => {
       .required(t('modal.errors.validation.required'))
       .min(3, t('modal.errors.validation.minMax'))
       .max(20, t('modal.errors.validation.minMax'))
-      .notOneOf(channels.map((channel) => channel.name), t('modal.errors.validation.unique'))
+      .notOneOf(channels.map((channel) => channel.name), t('modal.errors.validation.unique')),
   });
 
   const formik = useFormik({
@@ -50,12 +49,15 @@ const Add = ({ onHide, setCurrentChannelId }) => {
         }
       };
       try {
-        const { data } = await axios.post(routes.channelsPath(), values, { headers: getAuthHeader() });
+        const { data } = await axios.post(
+          routes.channelsPath(),
+          values,
+          { headers: getAuthHeader() },
+        );
         notifySuccess();
         setCurrentChannelId(data.id);
         dispatch(addChannel(data));
         dispatch(setCurrentChannel(data.id));
-
       } catch (err) {
         formik.setSubmitting(false);
 
@@ -70,30 +72,30 @@ const Add = ({ onHide, setCurrentChannelId }) => {
   return (
     <Modal show>
       <Modal.Header closeButton onHide={onHide}>
-        <Modal.Title className='h4'>{t('modal.add.heading')}</Modal.Title>
+        <Modal.Title className="h4">{t('modal.add.heading')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         <Form onSubmit={formik.handleSubmit}>
           <Form.Group>
             <Form.Control
-              name='name'
-              id='name'
+              name="name"
+              id="name"
               className={`mb-2 ${formik.errors.name && 'is-invalid'}`}
               value={formik.values.name}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              autoComplete='off'
+              autoComplete="off"
               required
               ref={inputRef}
             />
-            <Form.Label className='visually-hidden' htmlFor='name'>{t('modal.name')}</Form.Label>
-            <Form.Control.Feedback type='invalid'>{formik.errors.name}</Form.Control.Feedback>
+            <Form.Label className="visually-hidden" htmlFor="name">{t('modal.name')}</Form.Label>
+            <Form.Control.Feedback type="invalid">{formik.errors.name}</Form.Control.Feedback>
           </Form.Group>
 
-          <Form.Group className='d-flex justify-content-end'>
-            <Button className='me-2' variant='secondary' onClick={onHide}>{t('modal.cancelBtn')}</Button>
-            <Button type='submit' variant='primary'>{t('modal.submitBtn')}</Button>
+          <Form.Group className="d-flex justify-content-end">
+            <Button className="me-2" variant="secondary" onClick={onHide}>{t('modal.cancelBtn')}</Button>
+            <Button type="submit" variant="primary">{t('modal.submitBtn')}</Button>
           </Form.Group>
         </Form>
       </Modal.Body>
