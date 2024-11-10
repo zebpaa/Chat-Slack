@@ -3,12 +3,12 @@ import { useFormik } from 'formik';
 import { Modal, Form, Button } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import routes from '../../routes';
 import { selectors as channelsSelectors, updateChannel } from '../../services/channelsSlice';
 import getAuthHeader from '../../utils/utils';
+import { getChannelSchema } from '../../utils/validate';
 
 const Rename = ({ onHide, currentChannelId }) => {
   const dispatch = useDispatch();
@@ -22,19 +22,11 @@ const Rename = ({ onHide, currentChannelId }) => {
     setTimeout(() => inputRef.current && inputRef.current.select(), 0);
   }, []);
 
-  const channelSchema = Yup.object().shape({
-    name: Yup.string()
-      .required(t('modal.errors.validation.required'))
-      .min(3, t('modal.errors.validation.minMax'))
-      .max(20, t('modal.errors.validation.minMax'))
-      .notOneOf(channels.map((channel) => channel.name), t('modal.errors.validation.unique')),
-  });
-
   const formik = useFormik({
     initialValues: {
       name: currentChannel.name,
     },
-    validationSchema: channelSchema,
+    validationSchema: getChannelSchema(channels, t),
     enableReinitialize: true,
     onSubmit: async (values) => {
       const nostifySuccess = () => toast.success(t('toasts.renameChannel'));

@@ -7,11 +7,11 @@ import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { loginUser } from '../services/authSlice.js';
 import useAuth from '../hooks';
 import routes from '../routes';
+import { getSignUpSchema } from '../utils/validate.js';
 
 const SignUpPage = () => {
   const dispatch = useDispatch();
@@ -24,26 +24,13 @@ const SignUpPage = () => {
     inputRef.current.focus();
   }, []);
 
-  const signUpSchema = Yup.object().shape({
-    username: Yup.string()
-      .required(t('loginAndSignUp.errors.validation.required'))
-      .min(3, t('loginAndSignUp.errors.validation.nameSymbols'))
-      .max(20, t('loginAndSignUp.errors.validation.nameSymbols')),
-    password: Yup.string()
-      .required(t('loginAndSignUp.errors.validation.required'))
-      .min(6, t('loginAndSignUp.errors.validation.pasMinSymbols')),
-    confirmPassword: Yup.string()
-      .required(t('loginAndSignUp.errors.validation.required'))
-      .oneOf([Yup.ref('password')], t('loginAndSignUp.errors.validation.confirmPassword')),
-  });
-
   const formik = useFormik({
     initialValues: {
       username: '',
       password: '',
       confirmPassword: '',
     },
-    validationSchema: signUpSchema,
+    validationSchema: getSignUpSchema(t),
     onSubmit: async (values) => {
       try {
         const response = await axios.post(routes.signupPath(), values);

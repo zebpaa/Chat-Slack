@@ -3,13 +3,13 @@ import { useFormik } from 'formik';
 import { useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { selectors as channelsSelectors, addChannel } from '../../services/channelsSlice.js';
 import routes from '../../routes';
 import { setCurrentChannel } from '../../services/uiSlice';
 import getAuthHeader from '../../utils/utils.js';
+import { getChannelSchema } from '../../utils/validate';
 
 const Add = ({ onHide, setCurrentChannelId }) => {
   const channels = useSelector(channelsSelectors.selectAll);
@@ -21,19 +21,11 @@ const Add = ({ onHide, setCurrentChannelId }) => {
     inputRef.current.focus();
   }, []);
 
-  const channelSchema = Yup.object().shape({
-    name: Yup.string()
-      .required(t('modal.errors.validation.required'))
-      .min(3, t('modal.errors.validation.minMax'))
-      .max(20, t('modal.errors.validation.minMax'))
-      .notOneOf(channels.map((channel) => channel.name), t('modal.errors.validation.unique')),
-  });
-
   const formik = useFormik({
     initialValues: {
       name: '',
     },
-    validationSchema: channelSchema,
+    validationSchema: getChannelSchema(channels, t),
     onSubmit: async (values) => {
       const notifySuccess = () => toast.success(t('toasts.createChannel'));
       const notifyError = (type) => {
