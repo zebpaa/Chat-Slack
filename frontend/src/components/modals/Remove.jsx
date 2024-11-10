@@ -6,11 +6,7 @@ import { toast } from 'react-toastify';
 import routes from '../../routes';
 import { setCurrentChannel } from '../../services/uiSlice';
 import { removeChannel } from '../../services/channelsSlice';
-
-const getAuthHeader = () => {
-  const token = JSON.parse(localStorage.getItem('token'));
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+import getAuthHeader from '../../utils/utils';
 
 const Remove = ({
   onHide, currentChannelId, setCurrentChannelId, modalInfo: { item },
@@ -31,7 +27,7 @@ const Remove = ({
 
   const handleRemoveChannel = async () => {
     try {
-      await axios.delete(routes.channelPath(item), { headers: getAuthHeader() });
+      await axios.delete(routes.channelPath(item), getAuthHeader());
       notify();
       setCurrentChannelId(defaultChannelId);
       dispatch(removeChannel(currentChannelId));

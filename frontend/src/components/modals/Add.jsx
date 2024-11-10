@@ -9,11 +9,7 @@ import { toast } from 'react-toastify';
 import { selectors as channelsSelectors, addChannel } from '../../services/channelsSlice.js';
 import routes from '../../routes';
 import { setCurrentChannel } from '../../services/uiSlice';
-
-const getAuthHeader = () => {
-  const token = JSON.parse(localStorage.getItem('token'));
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+import getAuthHeader from '../../utils/utils.js';
 
 const Add = ({ onHide, setCurrentChannelId }) => {
   const channels = useSelector(channelsSelectors.selectAll);
@@ -52,7 +48,7 @@ const Add = ({ onHide, setCurrentChannelId }) => {
         const { data } = await axios.post(
           routes.channelsPath(),
           values,
-          { headers: getAuthHeader() },
+          getAuthHeader(),
         );
         notifySuccess();
         setCurrentChannelId(data.id);
