@@ -13,6 +13,7 @@ import { selectors as messagesSelectors, addMessages } from '../services/message
 import { setCurrentChannel } from '../services/uiSlice.js';
 import getModal from './modals/index.js';
 import getAuthHeader from '../utils/utils.js';
+import Loader from './Loader.jsx';
 
 const renderModal = ({
   modalInfo, hideModal, setCurrentChannelId, currentChannelId,
@@ -38,7 +39,7 @@ const HomePage = () => {
   const channels = useSelector(channelsSelectors.selectAll);
   const messages = useSelector(messagesSelectors.selectAll);
   const currentChannel = useSelector((state) => state.ui.currentChannelId);
-
+  const [isLoading, setIsLoading] = useState(true);
   const [currentChannelId, setCurrentChannelId] = useState(currentChannel);
   const [modalInfo, setModalInfo] = useState({ type: null, item: null });
   const hideModal = () => setModalInfo({ type: null, item: null });
@@ -48,17 +49,16 @@ const HomePage = () => {
     const fetchChannels = async () => {
       const { data } = await axios.get(routes.channelsPath(), getAuthHeader());
       dispatch(addChannels(data));
+      setIsLoading(false);
     };
 
-    fetchChannels();
-  }, [dispatch]);
-
-  useEffect(() => {
     const fetchMessages = async () => {
       const { data } = await axios.get(routes.messagesPath(), getAuthHeader());
       dispatch(addMessages(data));
+      setIsLoading(false);
     };
 
+    fetchChannels();
     fetchMessages();
   }, [dispatch]);
 
@@ -103,6 +103,10 @@ const HomePage = () => {
       ))
     );
   };
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <Container className="h-100 my-4 overflow-hidden rounded shadow">
