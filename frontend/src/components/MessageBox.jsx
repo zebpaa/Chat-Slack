@@ -17,10 +17,10 @@ const MessageBox = ({ messages, currentChannelId }) => {
   const inputRef = useRef();
   const currentChannel = channels.find((channel) => channel.id === currentChannelId);
   const { t } = useTranslation();
-  const messagesEndRef = useRef();
+  const messagesRef = useRef();
 
   const scrollToBottom = () => {
-    messagesEndRef?.current.scrollIntoView();
+    messagesRef?.current.scrollIntoView();
   };
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const MessageBox = ({ messages, currentChannelId }) => {
     messages.length > 0 && messages
       .filter((message) => message.channelId === currentChannelId)
       .map((message) => (
-        <div key={message.id} className="text-break mb-2" ref={messagesEndRef}>
+        <div key={message.id} className="text-break mb-2" ref={messagesRef}>
           <b>{message.username}</b>
           :
           {' '}
