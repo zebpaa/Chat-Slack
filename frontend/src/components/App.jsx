@@ -1,78 +1,28 @@
-import {
-  useEffect, useState, useCallback, useMemo,
-} from 'react';
+import { useEffect } from 'react';
 import {
   BrowserRouter as Router, Routes, Route, useLocation, Navigate,
 } from 'react-router-dom';
 import { Navbar, Container, Button } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import i18next from 'i18next';
 import { initReactI18next, useTranslation } from 'react-i18next';
 import { ToastContainer } from 'react-toastify';
 import filter from 'leo-profanity';
-import { Provider, ErrorBoundary } from '@rollbar/react';
 import LoginPage from './LoginPage';
 import NotFoundPage from './NotFoundPage';
+import AuthProvider from '../contexts/AuthProvider.jsx';
 import SignUpPage from './SignUpPage';
-import AuthContext from '../contexts/AuthContext';
-import useAuth from '../hooks/index.jsx';
 import HomePage from './HomePage.jsx';
-import { logoutUser } from '../services/authSlice.js';
+import useAuth from '../hooks/index.jsx';
 import { addChannel, removeChannel, updateChannel } from '../services/channelsSlice.js';
 import { addMessage } from '../services/messagesSlice.js';
-import { setCurrentChannel } from '../services/uiSlice.js';
 import socket from '../socket.js';
 import resources from '../locales/index.js';
 import 'react-toastify/dist/ReactToastify.min.css';
 
-const rollbarConfig = {
-  accessToken: import.meta.env.VITE_ROLLBAR_ACCESS_TOKEN,
-  environment: 'testenv',
-};
-
 filter.clearList();
 filter.add(filter.getDictionary('en'));
 filter.add(filter.getDictionary('ru'));
-
-const AuthProvider = ({ children }) => {
-  const hasToken = !!localStorage.getItem('token');
-  const [loggedIn, setLoggedIn] = useState(hasToken);
-  const dispatch = useDispatch();
-
-  const logIn = useCallback(() => {
-    setLoggedIn(true);
-  }, []);
-
-  const logOut = useCallback(() => {
-    localStorage.removeItem('username');
-    localStorage.removeItem('token');
-    dispatch(logoutUser());
-    setLoggedIn(false);
-  }, [dispatch]);
-
-  useEffect(() => {
-    const user = localStorage.getItem('username');
-    const token = localStorage.getItem('token');
-    if (user && token) {
-      logIn();
-    } else {
-      logOut();
-    }
-  }, [logIn, logOut]);
-
-  // Используем useMemo для мемоизации объекта value
-  const value = useMemo(() => ({ loggedIn, logIn, logOut }), [loggedIn, logIn, logOut]);
-
-  return (
-    <AuthContext.Provider value={value}>
-      <Provider config={rollbarConfig}>
-        <ErrorBoundary>
-          {children}
-        </ErrorBoundary>
-      </Provider>
-    </AuthContext.Provider>
-  );
-};
 
 const PrivateRoute = ({ children }) => {
   const auth = useAuth();
@@ -104,7 +54,6 @@ const App = () => {
 
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const defaultChannelId = useSelector((state) => state.ui.defaultChannelId);
 
   useEffect(() => {
     socket.on('newMessage', (payload) => {
@@ -114,9 +63,6 @@ const App = () => {
       dispatch(addChannel(payload));
     });
     socket.on('removeChannel', (payload) => {
-      console.log(payload.id); // { id: 6 };
-      console.log('defaultChannelId: ', defaultChannelId);
-      dispatch(setCurrentChannel(defaultChannelId));
       dispatch(removeChannel(payload.id));
     });
     socket.on('renameChannel', (payload) => {
@@ -129,7 +75,7 @@ const App = () => {
       socket.off('removeChannel');
       socket.off('renameChannel');
     };
-  }, [dispatch, defaultChannelId]);
+  }, [dispatch]);
 
   return (
     <AuthProvider>
