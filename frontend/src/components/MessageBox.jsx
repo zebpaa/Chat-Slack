@@ -17,6 +17,14 @@ const MessageBox = ({ messages, currentChannelId }) => {
   const inputRef = useRef();
   const currentChannel = channels.find((channel) => channel.id === currentChannelId);
   const { t } = useTranslation();
+  const messagesEndRef = useRef();
+  const scrollToBottom = () => {
+    messagesEndRef?.current.scrollIntoView();
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, currentChannelId]);
 
   useEffect(() => {
     inputRef.current.focus();
@@ -29,15 +37,9 @@ const MessageBox = ({ messages, currentChannelId }) => {
       try {
         const res = await axios.post(routes.messagesPath(), values, getAuthHeader());
         dispatch(addMessage(res.data));
-        formik.setSubmitting(true);
         formik.resetForm();
       } catch (err) {
-        formik.setSubmitting(false);
-        // if (err.isAxiosError && err.response.status === 401) {
-        //     inputRef.current.select();
-        //     return;
-        // }
-        throw err;
+        throw new Error(err);
       }
     },
   });
@@ -46,7 +48,7 @@ const MessageBox = ({ messages, currentChannelId }) => {
     messages.length > 0 && messages
       .filter((message) => message.channelId === currentChannelId)
       .map((message) => (
-        <div key={message.id} className="text-break mb-2">
+        <div key={message.id} className="text-break mb-2" ref={messagesEndRef}>
           <b>{message.username}</b>
           :
           {' '}
@@ -83,6 +85,7 @@ const MessageBox = ({ messages, currentChannelId }) => {
               value={formik.values.body}
               onChange={formik.handleChange}
               ref={inputRef}
+              autoComplete="off"
             />
             <Button variant="group-vertical" type="submit" disabled={!formik.dirty}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
