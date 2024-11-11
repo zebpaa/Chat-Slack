@@ -36,6 +36,7 @@ export default {
       remove: 'Удалить',
       rename: 'Переименовать',
       addChannel: '+',
+      loader: 'Загрузка',
       messageCount: {
         keyWithCount_one: '{{count}} сообщение', // 1
         keyWithCount_few: '{{count}} сообщения', // для 2-4
