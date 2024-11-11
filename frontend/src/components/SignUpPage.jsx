@@ -40,18 +40,14 @@ const SignUpPage = () => {
         auth.logIn();
         navigate('/');
       } catch (err) {
-        formik.setSubmitting(false);
-
         if (err.isAxiosError && err.response.status === 409) {
-          formik.errors.confirmPassword = t('loginAndSignUp.errors.validation.status409');
+          formik.setFieldError('confirmPassword', t('loginAndSignUp.errors.validation.status409'));
         }
-
         if (err.isAxiosError && err.response.status === 401) {
-          // setAuthFailed(true);
           inputRef.current.select();
           return;
         }
-        throw err;
+        throw new Error(err);
       }
     },
   });
@@ -78,10 +74,13 @@ const SignUpPage = () => {
                     placeholder={t('loginAndSignUp.usernameSignUp')}
                     ref={inputRef}
                     required
-                    className={`${formik.errors.username && 'is-invalid'}`}
+                    className={`${formik.touched.username && formik.errors.username ? 'is-invalid' : ''}`}
+                    onBlur={formik.handleBlur}
                   />
                   <Form.Label htmlFor="username">{t('loginAndSignUp.usernameSignUp')}</Form.Label>
-                  <Form.Control.Feedback type="invalid">{formik.errors.username}</Form.Control.Feedback>
+                  {formik.touched.username && formik.errors.username
+                    ? (<Form.Control.Feedback type="invalid">{formik.errors.username}</Form.Control.Feedback>)
+                    : null}
                 </Form.Floating>
 
                 <Form.Floating className="mb-3">
@@ -96,10 +95,13 @@ const SignUpPage = () => {
                     aria-describedby="passwordHelpBlock"
                     aria-autocomplete="list"
                     required
-                    className={`${formik.errors.password && 'is-invalid'}`}
+                    className={`${formik.touched.password && formik.errors.password ? 'is-invalid' : ''}`}
+                    onBlur={formik.handleBlur}
                   />
                   <Form.Label htmlFor="password">{t('loginAndSignUp.password')}</Form.Label>
-                  <Form.Control.Feedback type="invalid">{formik.errors.password}</Form.Control.Feedback>
+                  {formik.touched.password && formik.errors.password
+                    ? (<Form.Control.Feedback type="invalid">{formik.errors.password}</Form.Control.Feedback>)
+                    : null}
                 </Form.Floating>
 
                 <Form.Floating className="mb-4">
@@ -112,10 +114,13 @@ const SignUpPage = () => {
                     name="confirmPassword"
                     autoComplete="new-password"
                     required
-                    className={`${formik.errors.confirmPassword && 'is-invalid'}`}
+                    className={`${formik.touched.confirmPassword && formik.errors.confirmPassword ? 'is-invalid' : ''}`}
+                    onBlur={formik.handleBlur}
                   />
                   <Form.Label htmlFor="confirmPassword">{t('loginAndSignUp.confirmPassword')}</Form.Label>
-                  <Form.Control.Feedback type="invalid">{formik.errors.confirmPassword}</Form.Control.Feedback>
+                  {formik.touched.confirmPassword && formik.errors.confirmPassword
+                    ? (<Form.Control.Feedback type="invalid">{formik.errors.confirmPassword}</Form.Control.Feedback>)
+                    : null}
                 </Form.Floating>
 
                 <Button variant="outline-primary" type="submit" className="w-100 mb-3">
