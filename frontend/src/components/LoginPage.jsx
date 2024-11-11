@@ -19,6 +19,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+
   useEffect(() => {
     inputRef.current.focus();
   }, []);
@@ -30,7 +31,6 @@ const LoginPage = () => {
     },
     onSubmit: async (values) => {
       setAuthFailed(false);
-
       try {
         const res = await axios.post(routes.loginPath(), values);
         localStorage.setItem('token', JSON.stringify(res.data.token));
@@ -39,13 +39,12 @@ const LoginPage = () => {
         auth.logIn();
         navigate('/');
       } catch (err) {
-        formik.setSubmitting(false);
         if (err.isAxiosError && err.response.status === 401) {
           setAuthFailed(true);
           inputRef.current.select();
           return;
         }
-        throw err;
+        throw new Error(err);
       }
     },
   });
