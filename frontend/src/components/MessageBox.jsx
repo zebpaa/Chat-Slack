@@ -18,6 +18,7 @@ const MessageBox = ({ messages, currentChannelId }) => {
   const currentChannel = channels.find((channel) => channel.id === currentChannelId);
   const { t } = useTranslation();
   const messagesEndRef = useRef();
+
   const scrollToBottom = () => {
     messagesEndRef?.current.scrollIntoView();
   };
