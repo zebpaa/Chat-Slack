@@ -20,7 +20,7 @@ const MessageBox = ({ messages, currentChannelId }) => {
   const messagesRef = useRef();
 
   const scrollToBottom = () => {
-    messagesRef?.current.scrollIntoView();
+    messagesRef?.current?.scrollIntoView();
   };
 
   useEffect(() => {
